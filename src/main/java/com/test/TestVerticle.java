@@ -25,6 +25,7 @@ public class TestVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
 
         router.route("/test").handler(event -> {
+            System.out.println("Handling /test");
             HttpClientRequest request1 = client.request(event.request().method(),
                     "/path/one", response -> {
                         response.bodyHandler(body -> {
@@ -35,7 +36,7 @@ public class TestVerticle extends AbstractVerticle {
                     })
                     .setTimeout(500L)
                     .exceptionHandler(throwable -> {
-                        System.out.println(">>>PATH 1 TIMEOUT");
+                        System.out.println(">>>PATH 1 TIMEOUT - expected");
                         //Not doing anything here as we are ok proceeding if this first path fails.
                     });
 
@@ -49,7 +50,7 @@ public class TestVerticle extends AbstractVerticle {
                     })
                     .setTimeout(500L)
                     .exceptionHandler(throwable -> {
-                        System.out.println(">>>PATH 2 TIMEOUT");
+                        System.out.println(">>>PATH 2 TIMEOUT - unexpected!");
                         event.response().setStatusCode(504);
                         //Deliberately ending response here as this is a critical service we depend on
                         event.response().end();

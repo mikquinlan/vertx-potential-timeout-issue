@@ -78,16 +78,14 @@ public class RunIntegrationTest {
 
         //Critical service works as expected
         ResponseDefinitionBuilder builder = WireMock.aResponse()
-                .withStatus(200)
-                .withHeader("header1", "headerValue1")
-                .withBody("{ \"event\": \"value\" }");
+                .withStatus(200);
         WireMock.stubFor(WireMock.get(urlEqualTo("/path/two")).willReturn(builder));
 
         //WHEN
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.connectorProvider(new ApacheConnectorProvider());
         Client client = ClientBuilder.newClient(clientConfig);
-        WebTarget target = client.target("http://localhost:7777").path("/test");
+        WebTarget target = client.target("http://localhost:8080").path("/test");
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
         Invocation invocation = invocationBuilder.buildGet();
         Response response = invocation.invoke();
