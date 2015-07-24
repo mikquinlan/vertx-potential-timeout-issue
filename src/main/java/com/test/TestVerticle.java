@@ -15,7 +15,13 @@ public class TestVerticle extends AbstractVerticle {
     @Override
     public void start() throws Exception {
 
-        HttpClient client = vertx.createHttpClient(new HttpClientOptions()
+        HttpClient client1 = vertx.createHttpClient(new HttpClientOptions()
+                .setMaxPoolSize(1)
+                .setConnectTimeout(100)
+                .setDefaultHost("localhost")
+                .setDefaultPort(7777));
+
+        HttpClient client2 = vertx.createHttpClient(new HttpClientOptions()
                 .setMaxPoolSize(1)
                 .setConnectTimeout(100)
                 .setDefaultHost("localhost")
@@ -26,7 +32,7 @@ public class TestVerticle extends AbstractVerticle {
 
         router.route("/test").handler(event -> {
             System.out.println("Handling /test");
-            HttpClientRequest request1 = client.request(event.request().method(),
+            HttpClientRequest request1 = client1.request(event.request().method(),
                     "/path/one", response -> {
                         response.bodyHandler(body -> {
                             event.response().setStatusCode(response.statusCode());
@@ -40,7 +46,7 @@ public class TestVerticle extends AbstractVerticle {
                         //Not doing anything here as we are ok proceeding if this first path fails.
                     });
 
-            HttpClientRequest request2 = client.request(event.request().method(),
+            HttpClientRequest request2 = client2.request(event.request().method(),
                     "/path/two", response -> {
                         response.bodyHandler(body -> {
                             event.response().setStatusCode(response.statusCode());

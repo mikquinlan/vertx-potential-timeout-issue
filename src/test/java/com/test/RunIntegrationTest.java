@@ -67,7 +67,7 @@ public class RunIntegrationTest {
         vertx.close();
     }
 
-    @Test
+//    @Test
     public void testTimeouts() throws Exception {
         //GIVEN
         //Non-critical service times out
@@ -92,5 +92,12 @@ public class RunIntegrationTest {
 
         //THEN
         assertThat(response.getStatus(), is(equalTo(200)));
+    }
+
+    @Test
+    public void testTimeoutsMultipleTimes() throws Exception {
+        testTimeouts();
+        testTimeouts();
+        testTimeouts();
     }
 }
