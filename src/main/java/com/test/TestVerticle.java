@@ -48,6 +48,7 @@ public class TestVerticle extends AbstractVerticle {
                             event.response().end(body.toString());
                         });
                     })
+                    //set this to 500L to reproduce the problem
                     .setTimeout(10000L)
                     .exceptionHandler(throwable -> {
                         System.out.println(">>>PATH 2 TIMEOUT - unexpected!");
