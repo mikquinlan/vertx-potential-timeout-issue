@@ -48,7 +48,7 @@ public class TestVerticle extends AbstractVerticle {
                             event.response().end(body.toString());
                         });
                     })
-                    .setTimeout(500L)
+                    .setTimeout(10000L)
                     .exceptionHandler(throwable -> {
                         System.out.println(">>>PATH 2 TIMEOUT - unexpected!");
                         event.response().setStatusCode(504);
