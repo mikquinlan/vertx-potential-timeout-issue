@@ -1,6 +1,5 @@
 package com.test;
 
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
@@ -11,7 +10,6 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.net.URI;
 import java.util.concurrent.CountDownLatch;
 
 import javax.ws.rs.client.Client;
@@ -23,21 +21,17 @@ import javax.ws.rs.core.Response;
 
 import io.vertx.core.Vertx;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-/**
- * //TODO - document
- *
- * @author mquinlan
- */
+
 public class RunIntegrationTest {
 
     Vertx vertx;
+    Client client;
 
 
     @ClassRule
@@ -60,6 +54,10 @@ public class RunIntegrationTest {
                 fail("Could not deploy verticle: " + asyncResult.cause().toString());
             }
         });
+
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.connectorProvider(new ApacheConnectorProvider());
+        client = ClientBuilder.newClient(clientConfig);
     }
 
     @After
@@ -68,29 +66,13 @@ public class RunIntegrationTest {
     }
 
     @Test
-    public void testTimeouts() throws Exception {
-        //GIVEN
-        //Non-critical service times out
-        ResponseDefinitionBuilder delayBuilder = WireMock.aResponse()
-                .withStatus(200)
-                .withFixedDelay(5000);
-        WireMock.stubFor(WireMock.get(urlEqualTo("/path/one")).willReturn(delayBuilder));
-
-        //Critical service works as expected
-        ResponseDefinitionBuilder builder = WireMock.aResponse()
-                .withStatus(200);
-        WireMock.stubFor(WireMock.get(urlEqualTo("/path/two")).willReturn(builder));
-
-        //WHEN
-        ClientConfig clientConfig = new ClientConfig();
-        clientConfig.connectorProvider(new ApacheConnectorProvider());
-        Client client = ClientBuilder.newClient(clientConfig);
-        WebTarget target = client.target("http://localhost:8080").path("/test");
+    public void testPrematurelyEndedRequest() {
+        WebTarget target = client.target("http://localhost:8080").path("/request-ended-demo");
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+        invocationBuilder.header("Authorization","1234");
         Invocation invocation = invocationBuilder.buildGet();
         Response response = invocation.invoke();
 
-        //THEN
         assertThat(response.getStatus(), is(equalTo(200)));
     }
 }
